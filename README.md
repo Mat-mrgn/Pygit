@@ -26,7 +26,7 @@ A personal, Python-based local file backup manager inspired by Git. Pygit lets y
 - **Command history** CLI remembers your previous commands across sessions
 
 # Project Structure
-
+```
 pygit/
 ├── current_save/          # Most recent snapshot
 │   ├── {date}.zip
@@ -49,7 +49,7 @@ pygit/
 │       └── ...
 ├── .pygnore               # Ignore rules (similar to .gitignore)
 └── .configfile            # Stored user configuration
-
+```
 
 # Getting Started
 ## Install dependencies:
