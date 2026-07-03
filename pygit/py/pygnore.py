@@ -44,12 +44,12 @@ BASE_DIR = COMPUTER.get_app_root()
 #                                       because everything that is outside this architecture work
 #                                       With absolute Path.
 
-# Ici on va attaquer le chantier de .pygnore
+# Here we will work on the gestion of  .pygnore
 
 class pygnore():
     
     def __init__(self):
-        self._path=BASE_DIR #le pyignore sera toujours recherché à la base du projet à moins d'un set demandé par l'utilisateur
+        self._path=BASE_DIR #The pyignore will always be searched at the root of the py folder. Except if the user set it specifically 
         #pygnore constructor under here |
         self._path=f"{BASE_DIR}/.pygnore"
         self.inc=[]
@@ -61,7 +61,7 @@ class pygnore():
 
 
     def _create_default(self):
-        """Crée le fichier par défaut et charge les règles"""
+        """Create the default file"""
         default_rules = [
             "# default exclude\n",
             "> fo __pycache__\n",
@@ -77,9 +77,9 @@ class pygnore():
         
 
     def forcewrite(self):
-        """Réécrit proprement le fichier à partir des listes en mémoire"""
+        """Rewrite properly the file with the list in memory"""
         with open(self._path, encoding="utf-8", mode="w") as pgi:
-            pgi.write("# Fichier .pygnore mis à jour\n")
+            pgi.write("# File .pygnore up to date!\n")
             for typ, pattern in self.exc:
                 pgi.write(f"> {typ} {pattern}\n")
             for typ, pattern in self.inc:
@@ -87,7 +87,7 @@ class pygnore():
             
         
     def load(self):
-        """Charge le .pygnore et remplit les listes d'exclude et d'include"""
+        """load .pygnore and fill the include / exclude list"""
         self.inc=[]
         self.exc=[]
         with open(self._path,encoding="utf-8",mode="r")as pgi:
@@ -106,15 +106,15 @@ class pygnore():
         
 
     def set_path(self,path):
-        """SETTER du path du fichier .pyignore"""
+        """SETTER of the path of the file .pyignore"""
         self._path=path
         
     def get_path(self):
-        """GETTER du path du fichier .pyignore"""
+        """GETTER of the path of the file .pyignore"""
         return self._path
         
     def add_exclude(self,typ,pattern):
-        """Ajoute un exclude"""
+        """Add a exclude"""
         if (typ, pattern) not in self.exc:
             self.exc.append((typ, pattern))
             with open(self._path, "a", encoding="utf-8") as pgi:
@@ -122,13 +122,14 @@ class pygnore():
         self.load()
 
     def del_exclude(self,typ,pattern):
+        """Delete an exclude"""
         if (typ, pattern) in self.exc:
             self.exc.remove((typ, pattern))
         self.forcewrite()
         self.load()
     
     def add_include(self,typ,pattern):
-        """Ajoute un include"""
+        """Add an include"""
         if (typ, pattern) not in self.inc:
             self.inc.append((typ, pattern))
             with open(self._path, "a", encoding="utf-8") as pgi:
@@ -136,6 +137,7 @@ class pygnore():
         self.load()
 
     def del_include(self,typ,pattern):
+        """Delete an include"""
         if (typ, pattern) in self.inc:
             self.inc.remove((typ, pattern))
         self.forcewrite()
@@ -144,18 +146,18 @@ class pygnore():
 
     
     def needtoInclude(self,name, is_dir=False):
-        """Détermine si un fichier/dossier doit être traité
-        Priorité: Include > Exclude >Default(Include)"""
-        #1. On gère les includes
+        """Say if a folder/ file need to be included or not
+        Priority: Include > Exclude >Default(Include)"""
+        #1. Manage includes
         current_type="fo" if is_dir else "fi"
         for rule_type, pattern in self.inc:
             if rule_type==current_type:
                 if fnmatch.fnmatch(name, pattern):
                     return True
-        #2. On gère les excludes
+        #2. Manage excludes
         for rule_type, pattern in self.exc:
             if rule_type==current_type:
                 if fnmatch.fnmatch(name, pattern):
                     return False   
-        #3. Par défaut on intègre
+        #3. By default it's integrated
         return True

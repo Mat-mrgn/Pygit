@@ -53,7 +53,7 @@ from getpass import getuser
 
 #==================================ZIP================================== 
 def compute_hash(path,speed,verbose=False):
-    """Calcule le hash d'un fichier standard."""
+    """Compute the hash of a standard file in xxh32."""
     if verbose:
         print(f"\tHash de {path} en cours...")
     hasher = xxhash.xxh32()
@@ -90,7 +90,7 @@ def benchmark_optimal_chunk_size(verbose=False):
     for file_size in test_files_mb:
         file_results = []
         if verbose:
-            print(f"--- TEST avec un fichier de {file_size}")
+            print(f"--- Test with a file of {file_size}")
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             tmp.write(os.urandom(1024 * 1024 * file_size))
             test_path = tmp.name
@@ -101,7 +101,7 @@ def benchmark_optimal_chunk_size(verbose=False):
                 duration = time.perf_counter() - start
                 vitesse = file_size / duration
                 if verbose:
-                    print(f"Fichier hasher en {round(duration,3)}s à une vitesse de {round(vitesse,1)}Mo/s")
+                    print(f"File hash in {round(duration,3)}s to a speed of  {round(vitesse,1)}MB/s")
                 file_results.append((size, vitesse))
             
             file_results.sort(key=lambda x: x[1], reverse=True)
@@ -115,8 +115,8 @@ def benchmark_optimal_chunk_size(verbose=False):
                 
     optimal_size = max(total_scores, key=total_scores.get)
     if verbose:
-        print(f"--- Benchmark terminé ---")
-        print(f"Taille optimale sélectionnée : {optimal_size} octets")
+        print(f"--- Benchmark Ended ---")
+        print(f"Optimized size is : {optimal_size} Bytes")
     return optimal_size
 #==================================PORTABILITE==================================
 _COMPUTER_INSTANCE=None

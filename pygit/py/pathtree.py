@@ -59,11 +59,10 @@ IGNORE_MNGR=pygnore()
 
 
 
-#===========Potentiellement à corriger===========
 def flat_tree(node, root_path):
     flat = {}
     path_str=node['path']
-    #il faut pouvoir différencier s'il provient d'un zip ou pas
+    #diff if the file is zip or not 
     if '://' in path_str:
         innerzipfile= path_str.split('://',1)[1]
         parts=innerzipfile.split("/",1)
@@ -72,7 +71,7 @@ def flat_tree(node, root_path):
         rel_path = os.path.relpath(node['path'], root_path)
     if node['type'] == 'file':
         if not ('checksum' in node):
-            #il faut pouvoir différencier s'il provient d'un zip ou pas
+            #dif if file is from a zip or not
             if '://' not in path_str: 
                 node['checksum'] = compute_hash(node['path'],COMPUTER.get_optimal_speed())
             else:
@@ -100,7 +99,7 @@ def get_child_list(path):
     else:
         return 0
 
-# GESTION DES ARBRES
+# TREE management
 
 
 def tree_to_json(tree,path):
@@ -118,9 +117,9 @@ def json_to_tree(path):
 
 
 def get_zip_tree(zip_path,verbose=False,is_root=True):
-    """Génère une structure similaire à get_tree mais pour un fichier .zip"""
+    """Generate a similar structure than of get_tree but for a .zip file"""
 
-    # on ajoute une gestion du include /exclude en comptant qu'ils viennent de get_unified_tree donc deux dictionnaires sous la forme {"type":"","names":[]}
+    # we add a managing system of the include /exclude taking if they are from get_unified_tree so two dictionnary under the type :  {"type":"","names":[]}
     if verbose:
         print(lang.t("ziptree_verbose"),path=zip_path)
     zip_path=Path(zip_path)
@@ -169,22 +168,22 @@ def get_zip_tree(zip_path,verbose=False,is_root=True):
                                 "smax": 0,
                                 "children": []
                             }
-                            # On ajoute le dossier à la liste "children" de son parent
+                            # We add the file to his "child" list
                             dir_nodes[parent_rel_path]["children"].append(new_node)
-                            # On le référence pour pouvoir lui ajouter des enfants plus tard
+                            # We add him in reference for later use
                             dir_nodes[current_rel_path] = new_node
                         else:
                             dir_nodes[current_rel_path] = None
                             skip = True
                             break
                     else:
-                        # Si l'entrée du dossier existait déjà mais qu'on tombe sur l'entrée 
-                        # officielle du dossier dans le ZIP, on met à jour son timestamp
+                        #If the entry of the folder already exist but we fall on the official 
+                        # entry of the folder in the zip, we modify it's timestamp
                         if is_dir and current_rel_path == full_path.rstrip('/'):
                             if dir_nodes[current_rel_path] is not None:
                                 dir_nodes[current_rel_path]["timestamp"] = datetime(*info.date_time).timestamp()
                 
-                # Si un des dossiers parents a été exclu, on passe au fichier suivant
+                # If one of the parents folder is excluded, we go to the next file
                 if skip or dir_nodes.get(current_rel_path) is None:
                     continue
                 
@@ -200,7 +199,7 @@ def get_zip_tree(zip_path,verbose=False,is_root=True):
                         except Exception:
                             checksum = "Error"
                             
-                        # On ajoute le fichier dans la liste "children" du dossier parent trouvé
+                        # We add the file in the list children of the parent folder
                         dir_nodes[current_rel_path]["children"].append({
                             "name": file_name,
                             "type": "file",
@@ -215,7 +214,7 @@ def get_zip_tree(zip_path,verbose=False,is_root=True):
                     node["children"].sort(key=lambda x: (x["type"] == "file", x["name"].lower()))
                     
     except Exception as e:
-        tree["error"] = f"Erreur lors de la lecture du ZIP : {str(e)}"
+        tree["error"] = f"Error during the ZIP reading : {str(e)}"
         
     return tree
             
@@ -224,7 +223,7 @@ def get_zip_tree(zip_path,verbose=False,is_root=True):
 def get_tree(path,verbose=False,is_root=True):
     path = os.path.abspath(path)
     name = os.path.basename(path)
-    # on ajoute une gestion du include /exclude en comptant qu'ils viennent de get_unified_tree donc deux dictionnaires sous la forme {"type":"","names":[]}
+    # we add a managing system of the include /exclude taking if they are from get_unified_tree so two dictionnary under the type :  {"type":"","names":[]}
     if verbose:
         print(lang.t("tree_verbose"),path=path)
     if os.path.isdir(path):
@@ -299,11 +298,11 @@ def get_node(path):
     return node
 
 def get_unified_tree(path,verbose=False):
-    """Détermine si c'est un zip ou un dossier et renvoie l'arbre correspondant"""
+    """Tell if it's a zip or a folder and send back the corresponding tree"""
     p = Path(path)
     if p.suffix.lower() == '.zip':
         return get_zip_tree(p,verbose)
-    # Sinon on utilise la fonction de pathtree.py
+    # Else we use the function of pathtree.py
     return get_tree(p,verbose)
 
 

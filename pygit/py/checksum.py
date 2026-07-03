@@ -1,5 +1,4 @@
 from pathlib import Path
-# comparaison de deux fichiers ou dossiers
 from pathtree import *
 import portabilite
 from portabilite import compute_hash

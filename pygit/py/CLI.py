@@ -133,7 +133,7 @@ def command(fctn, name):
 # --------------------------BASIC COMMAND--------------------------
 @command("help")
 async def displayHelp():
-    """L'affichage de la liste des fonctions"""
+    """Display the list of the function"""
     table = Table(title=lang.t("help_title"))
     table.add_column(lang.t("help_col_cmd"), justify="left", style="cyan", no_wrap=True)
     table.add_column(lang.t("help_col_info"), justify="left")
@@ -145,7 +145,7 @@ async def displayHelp():
 
 @command("clear")
 async def doClear():
-    """Efface le contenu du terminal"""
+    """Clear the terminal"""
     os.system('cls' if os.name == 'nt' else 'clear')
     rprint(LOGO)
     rprint(lang.t("TAGELINE"))
@@ -155,39 +155,39 @@ async def doClear():
 
 @command("quit")
 async def doQuit():
-    """Sortie du programme"""
+    """Exit the program"""
     exit(0)
 
 
 @command("exit")
 async def doExit():
-    """Sortie du programme"""
+    """Exit the program"""
     exit(0)
 
 
 @command("version")
 async def doVersion():
-    """La version de l'application"""
+    """App version"""
     rprint(Markdown(lang.t("VERSION")))
 
 
 @command("about")
 async def doAbout():
-    """A propos de l'application"""
+    """About the app"""
     rprint(Markdown(lang.t("ABOUT")))
 
 
 # --------------------------DIR COMMAND--------------------------
 @command("dir")
 async def doDir():
-    """Le chemin de fichier où sont placés les sauvegardes"""
+    """The path where the saves are located"""
     global cfg
     rprint(cfg.DIR)
 
 
 @command("setdir")
 async def setdir():
-    """Modifie le chemin de fichier où sont placés les sauvegardes"""
+    """Set the path were the saves will be located"""
     global cfg
     rprint(lang.t("setdir_current",dir=cfg.DIR))
     verif = False
@@ -200,7 +200,7 @@ async def setdir():
 
 @command("wdir")
 async def doWorkingdir():
-    """Le chemin de fichier du dossier de travail"""
+    """The path of the working dir"""
     global cfg
     if cfg.WORKINGDIR is None:
         rprint(lang.t("wdir_none"))
@@ -210,7 +210,7 @@ async def doWorkingdir():
 
 @command("setwdir")
 async def setWorkingdir():
-    """Modifie le chemin de fichier du dossier de travail"""
+    """Set the working dir file path"""
     global cfg
     rprint(lang.t("setwdir_current",wdir=cfg.WORKINGDIR))
     verif = False
@@ -227,7 +227,7 @@ async def setWorkingdir():
 
 @command("psetpath")
 async def set_Pygnore_path():
-    """Set le path du fichier .pygnore par défaut il est mit à la racine du projet"""
+    """Set the path of .pygnore by default he's set to the root of the app"""
     global IGNORE_MNGR
     current_path = IGNORE_MNGR.get_path()
     new = str(Prompt.ask(
@@ -248,7 +248,7 @@ async def set_Pygnore_path():
 
 @command("pgetpath")
 async def get_pygnore_path():
-    """Donne le path actuel du fichier .pygnore"""
+    """Give the path of the .pygnore"""
     global IGNORE_MNGR
     try:
         rprint(lang.t("pgetpath_success",path=IGNORE_MNGR.get_path()))
@@ -259,7 +259,7 @@ async def get_pygnore_path():
 
 @command("paddexclude")
 async def pygnore_add_exculde():
-    """Ajoute une type à la liste des excludes"""
+    """Add a typo to the excludes list"""
     rprint(PYGNORE_RAPPEL)
     global IGNORE_MNGR
     typ = ""
@@ -275,7 +275,7 @@ async def pygnore_add_exculde():
 
 @command("paddinclude")
 async def pygnore_add_include():
-    """Ajoute une type à la liste des includes"""
+    """Add a typo to the include list"""
     global IGNORE_MNGR
     typ = ""
     rprint(PYGNORE_RAPPEL)
@@ -291,7 +291,7 @@ async def pygnore_add_include():
 
 @command("pdelexclude")
 async def pygnore_del_exclude():
-    """Supprime une typo de la liste des excludes """
+    """Delete a typo of the exclude list """
     global IGNORE_MNGR
     rprint(PYGNORE_RAPPEL)
     typ = str(Prompt.ask(lang.t("pdelexclude_ask_type")))
@@ -312,7 +312,7 @@ async def pygnore_del_exclude():
 
 @command("pdelinclude")
 async def pygnore_del_include():
-    """Supprime une type de la liste des includes"""
+    """Delete a typo of the include list"""
     global IGNORE_MNGR
     rprint(PYGNORE_RAPPEL)
     typ = str(Prompt.ask(lang.t("pdelinclude_ask_type")))
@@ -333,7 +333,7 @@ async def pygnore_del_include():
 
 @command("pshowall")
 async def pygnore_showall():
-    """Affiche les listes d'include et d'exclude"""
+    """Display the include and exclude list"""
     global IGNORE_MNGR
     rprint(PYGNORE_RAPPEL)
     inc = IGNORE_MNGR.inc
@@ -348,7 +348,7 @@ async def pygnore_showall():
 
 @command("pshowinc")
 async def pygnore_showinc():
-    """Affiche la liste d'include"""
+    """Display the include list"""
     global IGNORE_MNGR
     rprint(PYGNORE_RAPPEL)
     inc = IGNORE_MNGR.inc
@@ -359,7 +359,7 @@ async def pygnore_showinc():
 
 @command("pshowexc")
 async def pygnore_showexc():
-    """Affiche la liste d'exclude"""
+    """Display the exclude list"""
     global IGNORE_MNGR
     rprint(PYGNORE_RAPPEL)
     exc = IGNORE_MNGR.exc
@@ -370,7 +370,7 @@ async def pygnore_showexc():
 
 @command("pneedtoinclude")
 async def pygnore_needtoinclude():
-    """Permet de tester si un fichier serait inclut ou non"""
+    """Test if a file will be included or no """
     global IGNORE_MNGR
     rprint(PYGNORE_RAPPEL)
     is_dir = str(Confirm.ask(lang.t("pneedtoinclude_ask_isdir")))
@@ -388,7 +388,7 @@ async def pygnore_needtoinclude():
 
 @command("save")
 async def cli_save(force: bool=False):
-    """Réalise une sauvegarde du {cfg.WORKINGDIR}"""
+    """Save the {cfg.WORKINGDIR}"""
     src=cfg.getWORKINGDIR()
     dest=cfg.getDIR()
     
@@ -411,7 +411,7 @@ async def cli_save(force: bool=False):
 
 @command("dryrun")
 async def cli_dryrun(verbose: bool=False):
-    """Vérifie et donne la liste des modifications entre la sauvegarde courante et le {cfg.WORKINGDIR}"""
+    """Check and give the list of the change of the save and the {cfg.WORKINGDIR}"""
     src=cfg.getWORKINGDIR()
     dest=cfg.getDIR()
     if not src or not dest:
@@ -434,7 +434,7 @@ async def cli_dryrun(verbose: bool=False):
 
 @command("restore")
 async def cli_restore():
-    """Restaure une sauvegarde à partir du {cfg.BASE_DIR}, ou d'anciennes sauvegardes"""
+    """Restore a save based of the {cfg.BASE_DIR}, or older save"""
     destpath=str(Prompt.ask(lang.t("restore_ask_dest")))
     if destpath is None or destpath=="":
         destpath=cfg.getWORKINGDIR()
@@ -539,8 +539,8 @@ async def CLI_checkfolder():
 # --------------------------PATHTREE COMMAND--------------------------
 @command("gettree")
 async def CLI_gettree():
-    """Détermine si le fichier est un zip ou pas et retourne son arbre avec le nom, le timestamp, la taille, 
-    son chemin et son hash pour chaque fichier/dossier présent dans le dossier en faisant attention au .pygnore"""
+    """Determineif the file is a zip or not and return his timestamp, his taille, 
+    the path and the hash of each fichier/dossier present in the folder with taking note of the .pygnore"""
     v=Confirm.ask(lang.t("gettree_verbose"))
     folder=Prompt.ask(lang.t("gettree_path"),default=None)
     if folder is None:

@@ -60,7 +60,7 @@ def load(lang: str):
     global _strings, _current_lang
     path=LANG_DIR / f"{lang}.json"
     if not path.exists():
-        #fallback sur anglais
+        #fallback on english
         lang="en"
         path= LANG_DIR / "en.json"
     with open(path,encoding="utf-8") as f:
@@ -69,7 +69,7 @@ def load(lang: str):
     
 
 def t(key: str,fallback: str = None, **kwargs) ->str: 
-    """Traduit une clé, Supporte les variables: t('save_action', src=x, dest=y"""
+    """Traduct a key, support variables: t('save_action', src=x, dest=y"""
     text= _strings.get(key,f"[missing : {key}]")
     if text is None:
         return fallback if fallback is not None else f'[Missing: {key}]'

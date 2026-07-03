@@ -108,29 +108,29 @@ class configfile():
             return 404
     
     def getDIR(self):
-        """Renvoie l'emplacement de l'application """
+        """Return app location """
         return self.DIR
     
     def getLANG(self):
-        """Renvoie la langue actuel"""
+        """Return current lang"""
         return self.LANG
     
     def getWORKINGDIR(self):
-        """Renvoie l'emplacement définit pour le workingdir"""
+        """Return the workingdir location"""
         return self.WORKINGDIR
 
     def setWORKINGDIR(self,pt):
-        """Permet de définir le workingdir"""
+        """Set the workingdir location"""
         self.WORKINGDIR=self.get_abs(pt)
         self.write()
         
     def setDIR(self,pt):
-        """Permet de définir l'emplacement des sauvegardes"""
+        """Set saves location"""
         self.DIR=self.get_abs(pt)
         self.write()
     
     def setLANG(self, lang:str):
-        """Permet de changer la langue de l'interface"""
+        """Set a different lang"""
         self.LANG=lang
         self.write()
         
