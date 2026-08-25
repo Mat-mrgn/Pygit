@@ -27,34 +27,61 @@ A personal, Python-based local file backup manager inspired by Git. Pygit lets y
 
 # Project Structure
 ```
-pygit/
-├── current_save/          # Most recent snapshot
-│   ├── {date}.zip
-│   └── jsontree.json      # Cached file tree for fast diff
-├── old_save/              # Older snapshots (capped by MAX_OLD_SAVE)
-│   └── {date}.zip
-├── py/                    # Application source (can live anywhere)
-│   ├── CLI.py             # Entry point — interactive command loop
-│   ├── save.py            # Save, dry-run, and restore logic
-│   ├── checksum.py        # File and folder integrity checking
-│   ├── pathtree.py        # Unified tree builder (folder or zip)
-│   ├── pygnore.py         # Include/exclude pattern manager
-│   ├── configfile.py      # Persistent config loader/writer
-│   ├── portabilite.py     # Cross-platform abstraction layer
-│   ├── README.py          # README file reader/writer
-│   ├── lang.py            # Translation loader
-│   └── lang/              # Language files
-│       ├── en.json
-│       ├── fr.json
-│       └── ...
-├── .pygnore               # Ignore rules (similar to .gitignore)
-└── .configfile            # Stored user configuration
+#    PYGIT (folder)
+#     |
+#     |----->saves (folder)
+#     |        |            
+#     |        |----->save_0 (folder)                       
+#     |        |        |----->current_save (folder)                        
+#     |        |        |             |----->Jsontree.json (the tree of the date.zip folder)
+#     |        |        |             |----->{date}.zip (the current save named by the date it was make at the format dd:mm:yy_hh:mm.zip)
+#     |        |        |----->old_save (folder)
+#     |        |                      |
+#     |        |                      |---->{date}.zip an old save. In the old_save folder a maximum number of save is fixed by the user in this file right above
+#     |        |                      |... and beyond until MAX_OLD_SAVE is reached
+#     |       ...
+#     |        |----->Save_N (folder)
+#     |        |-----> manifest.json 
+#     |
+#     |-------Py (folder)
+#     |        |
+#     |        |-------lang(folder) -> What langage your interface will display his message
+#     |        |         |
+#     |        |         |---->en.json
+#     |        |         |---->fr.json
+#     |        |         |---->other_lang.json...
+#     |        |
+#     |        |-------web(folder) -> it's all about the GUI...
+#     |        |         |
+#     |        |         |---->index.html
+#     |        |         |-------UI(folder) −> it's where all the stylesheet while be
+#     |        |         |        |
+#     |        |         |        |--->...somes stylesheet...
+#     |        |         |        |
+#     |        |         |
+#     |        |
+#     |        |---->lang.py
+#     |        |---->save.py   
+#     |        |---->checksum.py 
+#     |        |---->pathree.py
+#     |        |---->README.py 
+#     |        |---->portabilite.py 
+#     |        |---->pygnore.py
+#     |        |---->configfile.py
+#     |        |---->CLI.py
+#     |        |---->manifest.py
+#     |        |---->GUI_engine.py
+#     |        |---->GUI.py (we are here)
+#     |
+#     |------> README.txt
+#     |------>.pygnore
+#     |------>.config-file
 ```
 
 # Getting Started
-## Install dependencies:
+## Install dependencies in the py folder:
 ```bash
-pip install rich prompt_toolkit
+pip install -r requirements.txt
 ```
 
 ## Running Pygit
@@ -62,7 +89,7 @@ pip install rich prompt_toolkit
 cd pygit/py
 python CLI.py
 ```
-On first launch, Pygit will load your config and .pygnore settings, then drop you into the interactive prompt.
+On first launch, Pygit will load a default config and .pygnore settings, then drop you into the interactive prompt.
 
 press Enter or help to get all the commands.
 
@@ -83,18 +110,20 @@ Pygit ships with a default .pygnore that excludes common noise:
 
 ## Supported Languages
 
-en · fr · es · de · it · pt · nl · pl · jap · zh · la · arr · om · qu · hex
+de · en · es · fr · id · it · jap · ko · la · nl · pl · pt · qu · ru · tr · vi · arr · hex
 
 Switch language at runtime with setlang.
 
-
+For most of the langages, it is done by the help of AI because I'm not familiar with every langages but I want it as accessible for everyone as possible... 
+Some langages were reviewed by native speaker (French, English, Deutsch) but still some errors could be in.
 ## Version History
 
 Version  Date          Notes  
 A      13/04/2026    Initial release
 B      27/04/2026    .pygnore management, basic CLI commands
 C      06/05/2026    Persistent config file, pygnore and save commands
-D      13/05/2026    Multilingual support, pathtree, checksum, readme commands
+D      13/05/2026    Multilingual support, pathtree, checksum, readme commands and other commands. Multilingual support extended to all PyGit commands and even inside the program internals
+E      25/08/2026    CLI fully functionable, more langages and the start of the GUI interface. There is no a manifest and the save is done differently to provide more saves capability management.
 
 
 # Notes
