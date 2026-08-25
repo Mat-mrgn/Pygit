@@ -1,0 +1,53 @@
+/* =============================================================================
+   PyGit — themes/minimal.css
+   -----------------------------------------------------------------------------
+   Un theme ne contient QUE des surcharges de variables (et ses @font-face).
+   Aucun selecteur de composant, aucune regle de structure : si un theme se met
+   a repositionner un bouton, la promesse "une propriete non definie herite"
+   tombe et base.css ne peut plus rien garantir.
+
+   Minimal est le theme par defaut. Il ne redefinit volontairement pas tout :
+   ce qui manque ici tombe sur base.css, et c'est le comportement attendu.
+   ============================================================================= */
+
+/* Fonte embarquee dans le theme. Le fichier vit a cote, pas dans UI/ :
+   un theme est autonome, on doit pouvoir le supprimer d'un seul coup.
+
+@font-face {
+    font-family: "PyGit Minimal";
+    src: url("minimal/Inter-Variable.ttf") format("truetype-variations");
+    font-weight: 100 900;
+    font-display: swap;
+}
+*/
+
+:root {
+    /* Papier froid plutot que blanc pur : les longues listes de chemins en
+       monospace fatiguent moins, et la carte blanche ressort. */
+    --pg-bg:            #e8eaee;
+    --pg-surface:       #ffffff;
+    --pg-surface-alt:   #f3f4f7;
+    --pg-surface-deep:  #171a21;
+    --pg-border:        #cfd4dd;
+    --pg-border-strong: #aab2c0;
+
+    --pg-text:          #13161b;
+    --pg-text-dim:      #616a78;
+    --pg-text-invert:   #e7eaf0;
+
+    /* Indigo : assez loin du vert/ambre/rouge semantiques pour qu'un bouton
+       primaire ne soit jamais confondu avec un etat. */
+    --pg-accent:        #2e42d5;
+    --pg-accent-text:   #ffffff;
+    --pg-accent-dim:    #e4e7fb;
+
+    --pg-ok:     #147a4a;
+    --pg-warn:   #9a6100;
+    --pg-err:    #c02626;
+    --pg-info:   #0a6e7a;
+
+    /* --pg-font: "PyGit Minimal", system-ui, sans-serif; */
+    --pg-radius:    6px;
+    --pg-radius-sm: 3px;
+    --pg-shadow:    0 1px 2px rgba(19, 22, 27, .08);
+}

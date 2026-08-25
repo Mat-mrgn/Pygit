@@ -1,0 +1,16 @@
+# --- Engine(CLI + GUI) ---
+xxhash>=3.4
+rich>=13.7
+
+# --- CLI only ---
+prompt_toolkit>=3.0
+
+# --- GUI only ---
+pywebview>=6.6
+
+# Note : compression/decompression (save.py/portabilite.py) use the
+# system commands `zip`/`unzip` (Linux/macOS) or PowerShell
+# Compress-Archive/Expand-Archive (Windows, natively include it since Windows10).
+# On Linux/macOS, if `zip`/`unzip` aren't installed :
+#   Debian/Ubuntu : sudo apt install zip unzip
+#   macOS         : SHOULD BE natively installed

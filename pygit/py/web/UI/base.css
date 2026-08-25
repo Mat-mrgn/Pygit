@@ -1,0 +1,507 @@
+/* =============================================================================
+   PyGit — base.css
+   -----------------------------------------------------------------------------
+   Ce fichier est LE CONTRAT. Il declare toutes les variables et toute la
+   structure. Un theme ne fait que surcharger des variables : s'il n'en definit
+   aucune, l'interface reste utilisable telle quelle.
+
+   REGLE UNIQUE : aucune couleur, aucune taille, aucune fonte en dur en dehors
+   du bloc :root ci-dessous. Une valeur codee en dur dans une regle de composant
+   est un trou qu'aucun theme ne pourra reboucher, et que personne ne trouvera.
+   ============================================================================= */
+
+:root {
+    /* --- surfaces ------------------------------------------------------- */
+    --pg-bg:            #e8eaee;
+    --pg-surface:       #ffffff;
+    --pg-surface-alt:   #f3f4f7;
+    --pg-surface-deep:  #171a21;   /* le journal, seule surface sombre */
+    --pg-border:        #cfd4dd;
+    --pg-border-strong: #aab2c0;
+
+    /* --- texte ---------------------------------------------------------- */
+    --pg-text:          #13161b;
+    --pg-text-dim:      #616a78;
+    --pg-text-invert:   #e7eaf0;
+
+    /* --- accent (seule variable que la couleur utilisateur ecrase) ------- */
+    --pg-accent:        #2e42d5;
+    --pg-accent-text:   #ffffff;
+    --pg-accent-dim:    #e4e7fb;
+
+    /* --- semantique : le markup rich du coeur se mappe ici --------------- */
+    --pg-ok:     #147a4a;
+    --pg-warn:   #9a6100;
+    --pg-err:    #c02626;
+    --pg-info:   #0a6e7a;   /* cyan du prompt CLI */
+
+    /* --- typographie ---------------------------------------------------- */
+    --pg-font:      system-ui, -apple-system, "Segoe UI", Cantarell, sans-serif;
+    --pg-font-mono: ui-monospace, "JetBrains Mono", "DejaVu Sans Mono", monospace;
+    --pg-size-xs:   0.75rem;
+    --pg-size-sm:   0.8125rem;
+    --pg-size-md:   0.9375rem;
+    --pg-size-lg:   1.125rem;
+    --pg-size-xl:   1.5rem;
+    --pg-size-hero: 2.5rem;
+    --pg-weight:        400;
+    --pg-weight-strong: 600;
+    --pg-lh:        1.5;
+    --pg-tracking:  0;
+    --pg-tracking-label: 0.08em;
+
+    /* --- rythme --------------------------------------------------------- */
+    --pg-gap-xs: 4px;
+    --pg-gap-sm: 8px;
+    --pg-gap-md: 16px;
+    --pg-gap-lg: 24px;
+    --pg-gap-xl: 40px;
+    --pg-radius:      6px;
+    --pg-radius-sm:   3px;
+    --pg-border-w:    1px;
+    --pg-shadow:      0 1px 2px rgba(19, 22, 27, .08);
+    --pg-shadow-lift: 0 8px 32px rgba(19, 22, 27, .18);
+
+    /* --- gabarit -------------------------------------------------------- */
+    --pg-nav-w:      232px;
+    --pg-content-w:  860px;
+    --pg-meter-h:    4px;
+    --pg-motion:     140ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root { --pg-motion: 0ms; }
+}
+
+/* =============================================================================
+   RESET
+   ============================================================================= */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+    margin: 0;
+    font-family: var(--pg-font);
+    font-size: var(--pg-size-md);
+    font-weight: var(--pg-weight);
+    line-height: var(--pg-lh);
+    letter-spacing: var(--pg-tracking);
+    color: var(--pg-text);
+    background: var(--pg-bg);
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, p, dl, dd, ul, pre { margin: 0; }
+ul { padding: 0; list-style: none; }
+[hidden] { display: none !important; }
+
+:focus-visible {
+    outline: 2px solid var(--pg-accent);
+    outline-offset: 2px;
+}
+
+.mono { font-family: var(--pg-font-mono); font-size: var(--pg-size-sm); }
+.dim  { color: var(--pg-text-dim); }
+
+/* =============================================================================
+   GABARIT — barre laterale fixe, contenu qui defile
+   ============================================================================= */
+
+.app {
+    display: grid;
+    grid-template-columns: var(--pg-nav-w) 1fr;
+    height: 100%;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--pg-gap-xs);
+    padding: var(--pg-gap-lg) var(--pg-gap-md);
+    border-inline-end: var(--pg-border-w) solid var(--pg-border);
+    background: var(--pg-surface-alt);
+}
+
+.brand {
+    font-size: var(--pg-size-lg);
+    font-weight: var(--pg-weight-strong);
+    letter-spacing: var(--pg-tracking-label);
+    padding: 0 var(--pg-gap-sm) var(--pg-gap-lg);
+}
+
+.nav-list { display: flex; flex-direction: column; gap: 2px; }
+
+/* Les cles gui_nav_* portent deja leur emoji : pas de ::before ici. */
+.nav-item {
+    font: inherit;
+    text-align: start;
+    padding: var(--pg-gap-sm) var(--pg-gap-sm);
+    border: 0;
+    border-radius: var(--pg-radius-sm);
+    background: transparent;
+    color: var(--pg-text);
+    cursor: pointer;
+    transition: background var(--pg-motion);
+}
+.nav-item:hover { background: var(--pg-surface); }
+
+.nav-job { margin-top: auto; font-size: var(--pg-size-xs); color: var(--pg-text-dim); }
+
+.main {
+    overflow-y: auto;
+    padding: var(--pg-gap-xl) var(--pg-gap-lg);
+}
+
+.main > section {
+    display: none;
+    max-width: var(--pg-content-w);
+    margin: 0 auto;
+}
+
+/* La bascule d'ecran, et rien d'autre : le contexte JS, le polling et le
+   journal survivent au changement de vue. */
+body[data-view="dashboard"] section[data-view="dashboard"],
+body[data-view="saves"]     section[data-view="saves"],
+body[data-view="pygnore"]   section[data-view="pygnore"],
+body[data-view="tools"]     section[data-view="tools"],
+body[data-view="settings"]  section[data-view="settings"] {
+    display: block;
+}
+
+body[data-view="dashboard"] .nav-item[data-goto="dashboard"],
+body[data-view="saves"]     .nav-item[data-goto="saves"],
+body[data-view="pygnore"]   .nav-item[data-goto="pygnore"],
+body[data-view="tools"]     .nav-item[data-goto="tools"],
+body[data-view="settings"]  .nav-item[data-goto="settings"] {
+    background: var(--pg-surface);
+    box-shadow: inset 2px 0 0 var(--pg-accent);
+    font-weight: var(--pg-weight-strong);
+}
+
+/* =============================================================================
+   TYPOGRAPHIE DE PAGE
+   ============================================================================= */
+
+h1 {
+    font-size: var(--pg-size-xl);
+    font-weight: var(--pg-weight-strong);
+    margin-bottom: var(--pg-gap-sm);
+}
+
+h2 {
+    font-size: var(--pg-size-xs);
+    font-weight: var(--pg-weight-strong);
+    text-transform: uppercase;
+    letter-spacing: var(--pg-tracking-label);
+    color: var(--pg-text-dim);
+    margin-bottom: var(--pg-gap-md);
+}
+
+.intro { color: var(--pg-text-dim); margin-bottom: var(--pg-gap-lg); max-width: 60ch; }
+.hint  { color: var(--pg-text-dim); font-size: var(--pg-size-sm); margin-bottom: var(--pg-gap-md); max-width: 60ch; }
+.empty { padding: var(--pg-gap-md) 0; }
+.label { font-size: var(--pg-size-xs); text-transform: uppercase; letter-spacing: var(--pg-tracking-label); color: var(--pg-text-dim); }
+
+/* =============================================================================
+   BLOCS
+   ============================================================================= */
+
+.card {
+    background: var(--pg-surface);
+    border: var(--pg-border-w) solid var(--pg-border);
+    border-radius: var(--pg-radius);
+    box-shadow: var(--pg-shadow);
+    padding: var(--pg-gap-lg);
+    margin-bottom: var(--pg-gap-md);
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--pg-gap-md);
+}
+
+.row     { display: flex; align-items: center; gap: var(--pg-gap-sm); flex-wrap: wrap; }
+.row.end     { justify-content: flex-end; }
+.row.between { justify-content: space-between; }
+.actions { display: flex; gap: var(--pg-gap-sm); flex-wrap: wrap; }
+
+.field { margin-bottom: var(--pg-gap-md); }
+.field > label {
+    display: block;
+    margin-bottom: var(--pg-gap-xs);
+    font-size: var(--pg-size-sm);
+    color: var(--pg-text-dim);
+}
+
+/* --- l'etat, en un mot : c'est la premiere chose que la fenetre dit --------- */
+.status-card { padding-bottom: var(--pg-gap-md); }
+.status-head { display: flex; justify-content: space-between; align-items: center; }
+
+.status-word {
+    font-size: var(--pg-size-hero);
+    font-weight: var(--pg-weight-strong);
+    line-height: 1.1;
+    margin: var(--pg-gap-sm) 0 var(--pg-gap-lg);
+}
+.status-word[data-tone="ok"]      { color: var(--pg-ok); }
+.status-word[data-tone="warn"]    { color: var(--pg-warn); }
+.status-word[data-tone="err"]     { color: var(--pg-err); }
+.status-word[data-tone="unknown"] { color: var(--pg-text-dim); }
+
+/* La fiche d'instruments : hachures fines, valeurs en mono. */
+.specs { display: grid; gap: 0; border-top: var(--pg-border-w) solid var(--pg-border); }
+.specs > div {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: var(--pg-gap-md);
+    padding: var(--pg-gap-sm) 0;
+    border-bottom: var(--pg-border-w) solid var(--pg-border);
+}
+.specs dt { font-size: var(--pg-size-xs); text-transform: uppercase; letter-spacing: var(--pg-tracking-label); color: var(--pg-text-dim); }
+.specs dd { font-family: var(--pg-font-mono); font-size: var(--pg-size-sm); overflow-wrap: anywhere; }
+
+/* =============================================================================
+   CONTROLES
+   ============================================================================= */
+
+.btn {
+    font: inherit;
+    font-size: var(--pg-size-sm);
+    padding: var(--pg-gap-sm) var(--pg-gap-md);
+    border: var(--pg-border-w) solid var(--pg-border-strong);
+    border-radius: var(--pg-radius-sm);
+    background: var(--pg-surface);
+    color: var(--pg-text);
+    cursor: pointer;
+    transition: background var(--pg-motion), border-color var(--pg-motion);
+}
+.btn:hover { background: var(--pg-surface-alt); }
+
+.btn.primary {
+    background: var(--pg-accent);
+    border-color: var(--pg-accent);
+    color: var(--pg-accent-text);
+    font-weight: var(--pg-weight-strong);
+}
+.btn.primary:hover { filter: brightness(1.08); }
+
+.btn.ghost  { background: transparent; border-color: transparent; color: var(--pg-accent); }
+.btn.ghost:hover { background: var(--pg-accent-dim); }
+.btn.danger { color: var(--pg-err); }
+.btn.danger.ghost:hover { background: transparent; text-decoration: underline; }
+
+input[type="text"], select {
+    font: inherit;
+    font-size: var(--pg-size-sm);
+    flex: 1 1 240px;
+    min-width: 0;
+    padding: var(--pg-gap-sm);
+    border: var(--pg-border-w) solid var(--pg-border-strong);
+    border-radius: var(--pg-radius-sm);
+    background: var(--pg-surface);
+    color: var(--pg-text);
+}
+input[type="text"] { font-family: var(--pg-font-mono); }
+input[type="range"] { flex: 1 1 200px; accent-color: var(--pg-accent); }
+input[type="color"] {
+    width: 44px; height: 32px; padding: 2px;
+    border: var(--pg-border-w) solid var(--pg-border-strong);
+    border-radius: var(--pg-radius-sm);
+    background: var(--pg-surface);
+}
+input[type="checkbox"] { accent-color: var(--pg-accent); }
+
+.check { display: inline-flex; align-items: center; gap: var(--pg-gap-sm); font-size: var(--pg-size-sm); cursor: pointer; }
+
+/* Garde-fou 2 : la configuration gele tant qu'un job tourne. Le front desactive,
+   il n'attend pas le refus "busy" du moteur pour le montrer. */
+body[data-busy] [data-lock] {
+    opacity: .45;
+    pointer-events: none;
+}
+
+/* =============================================================================
+   PROGRESSION
+   Le pourcentage est celui de la tache en vol, pas du job : un save en produit
+   trois. Le libelle a cote de la barre est ce qui rend la remise a zero lisible.
+   ============================================================================= */
+
+.meter {
+    height: var(--pg-meter-h);
+    border-radius: var(--pg-meter-h);
+    background: var(--pg-border);
+    overflow: hidden;
+}
+.meter.wide { margin-bottom: var(--pg-gap-sm); }
+.meter-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--pg-accent);
+    transition: width var(--pg-motion);
+}
+
+/* =============================================================================
+   JOURNAL
+   Seule surface sombre de l'interface, et c'est un choix : ces lignes viennent
+   telles quelles du coeur, markup rich compris.
+   ============================================================================= */
+
+.log-card { padding-bottom: var(--pg-gap-md); }
+
+.log {
+    font-family: var(--pg-font-mono);
+    font-size: var(--pg-size-sm);
+    line-height: 1.6;
+    max-height: 260px;
+    overflow-y: auto;
+    padding: var(--pg-gap-md);
+    border-radius: var(--pg-radius-sm);
+    background: var(--pg-surface-deep);
+    color: var(--pg-text-invert);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+/* Cibles du rendu de [green]...[/green] & co. Les noms suivent rich, pas le
+   theme : c'est le moteur qui envoie "green", le front ne fait que mapper. */
+.log .green, .log .ok    { color: var(--pg-ok); }
+.log .yellow, .log .warn { color: var(--pg-warn); }
+.log .red, .log .err     { color: var(--pg-err); }
+.log .cyan, .log .blue   { color: var(--pg-info); }
+.log .bold  { font-weight: var(--pg-weight-strong); }
+.log .dim   { opacity: .6; }
+
+.report {
+    font-family: var(--pg-font-mono);
+    font-size: var(--pg-size-sm);
+    max-height: 320px;
+    overflow-y: auto;
+    margin-top: var(--pg-gap-md);
+    padding: var(--pg-gap-md);
+    border: var(--pg-border-w) solid var(--pg-border);
+    border-radius: var(--pg-radius-sm);
+    background: var(--pg-surface-alt);
+    white-space: pre-wrap;
+}
+
+/* =============================================================================
+   TABLES, LISTES, ARBRE
+   ============================================================================= */
+
+.table { width: 100%; border-collapse: collapse; font-size: var(--pg-size-sm); }
+.table th {
+    text-align: start;
+    font-size: var(--pg-size-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--pg-tracking-label);
+    color: var(--pg-text-dim);
+    font-weight: var(--pg-weight-strong);
+    padding: var(--pg-gap-sm);
+    border-bottom: var(--pg-border-w) solid var(--pg-border-strong);
+}
+.table td {
+    padding: var(--pg-gap-sm);
+    border-bottom: var(--pg-border-w) solid var(--pg-border);
+    font-family: var(--pg-font-mono);
+    overflow-wrap: anywhere;
+}
+.table tr[aria-selected="true"] td { background: var(--pg-accent-dim); }
+.table tbody tr { cursor: pointer; }
+
+.archive-list { display: flex; flex-direction: column; gap: var(--pg-gap-xs); margin-bottom: var(--pg-gap-md); }
+.archive-item {
+    display: flex; justify-content: space-between; gap: var(--pg-gap-md);
+    padding: var(--pg-gap-sm) var(--pg-gap-md);
+    border: var(--pg-border-w) solid var(--pg-border);
+    border-radius: var(--pg-radius-sm);
+    font-family: var(--pg-font-mono);
+    font-size: var(--pg-size-sm);
+    cursor: pointer;
+}
+.archive-item[aria-selected="true"] { border-color: var(--pg-accent); background: var(--pg-accent-dim); }
+
+/* comparefolder est mis a plat par le moteur en {kind, path} : le front ne
+   connait pas la position du None dans le tuple. */
+.changes { font-family: var(--pg-font-mono); font-size: var(--pg-size-sm); margin-top: var(--pg-gap-md); }
+.changes li { padding: 2px 0; }
+.changes li::before { content: attr(data-sign) " "; }
+.changes li[data-kind="created"]  { color: var(--pg-ok); }
+.changes li[data-kind="deleted"]  { color: var(--pg-err); }
+.changes li[data-kind="modified"] { color: var(--pg-warn); }
+.changes li[data-kind="moved"]    { color: var(--pg-info); }
+
+.tree { font-family: var(--pg-font-mono); font-size: var(--pg-size-sm); margin-top: var(--pg-gap-md); }
+.tree ul { padding-inline-start: var(--pg-gap-md); border-inline-start: var(--pg-border-w) solid var(--pg-border); margin-inline-start: var(--pg-gap-sm); }
+.tree li { padding: 1px 0; }
+.tree .node { cursor: pointer; padding: 1px var(--pg-gap-xs); border-radius: var(--pg-radius-sm); }
+.tree .node:hover { background: var(--pg-surface-alt); }
+.tree .node[data-type="dir"]::before  { content: "▸ "; color: var(--pg-text-dim); }
+[dir="rtl"] .tree .node[data-type="dir"]::before { content: "◂ "; }
+.tree .node[aria-expanded="true"]::before { content: "▾ "; }
+.tree .node[data-type="file"] { padding-inline-start: 1.1em; }
+
+/* =============================================================================
+   MESSAGES, MODALES
+   ============================================================================= */
+
+.msg { font-size: var(--pg-size-sm); margin-top: var(--pg-gap-md); }
+.msg.ok   { color: var(--pg-ok); }
+.msg.warn { color: var(--pg-warn); }
+.msg.err  { color: var(--pg-err); }
+
+.scrim {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: var(--pg-gap-lg);
+    background: rgba(19, 22, 27, .45);
+}
+
+.modal {
+    width: 100%;
+    max-width: 440px;
+    padding: var(--pg-gap-lg);
+    border-radius: var(--pg-radius);
+    background: var(--pg-surface);
+    box-shadow: var(--pg-shadow-lift);
+}
+.modal p { margin: var(--pg-gap-sm) 0 var(--pg-gap-lg); white-space: pre-line; }
+
+.toast {
+    position: fixed;
+    left: 50%; bottom: var(--pg-gap-lg);
+    transform: translateX(-50%);
+    padding: var(--pg-gap-sm) var(--pg-gap-md);
+    border-radius: var(--pg-radius-sm);
+    background: var(--pg-surface-deep);
+    color: var(--pg-text-invert);
+    font-size: var(--pg-size-sm);
+    box-shadow: var(--pg-shadow-lift);
+}
+.toast[data-tone="err"]  { background: var(--pg-err); }
+.toast[data-tone="warn"] { background: var(--pg-warn); }
+
+/* =============================================================================
+   FENETRE ETROITE — min_size est (880, 560) dans GUI.py
+   ============================================================================= */
+
+@media (max-width: 920px) {
+    /* Pas de mode icones : l'emoji vit DANS la chaine traduite, on ne peut donc
+       pas masquer le libelle sans le masquer aussi. On retrecit, c'est tout. */
+    :root { --pg-nav-w: 176px; }
+    .main { padding: var(--pg-gap-lg) var(--pg-gap-md); }
+    .grid-2 { grid-template-columns: 1fr; }
+    .specs > div { grid-template-columns: 1fr; gap: 0; }
+}
+
+/* Une ligne de changement : le mot traduit, puis le chemin. Le signe reste un
+   symbole (::before sur data-sign), il ne se traduit pas. */
+.change-kind {
+    display: inline-block;
+    min-width: 9ch;
+    color: inherit;
+    opacity: .85;
+}
+.change-path { color: var(--pg-text); font-family: var(--pg-font-mono); }

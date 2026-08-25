@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PyGit</title>
+
+    <!-- L'ORDRE DE CHARGEMENT EST LA CASCADE.
+         base.css declare TOUTES les variables et toute la structure.
+         Le theme ne fait que surcharger des variables : une propriete qu'il
+         ne definit pas herite de base.css au lieu d'echouer.
+         L'accent utilisateur et les snippets sont injectes plus bas, donc gagnent. -->
+    <link rel="stylesheet" href="UI/base.css">
+    <link rel="stylesheet" href="UI/themes/minimal.css" id="pg-theme">
+    <style id="pg-accent"></style>
+    <div id="pg-snippets" hidden></div>
+</head>
+
+<body data-view="dashboard">
+
+<div class="app">
+
+    <!-- =====================================================================
+         BARRE DE NAVIGATION
+         Les cles gui_nav_* contiennent DEJA leur emoji : le CSS n'ajoute
+         aucune icone, sinon on en affiche deux.
+         ===================================================================== -->
+    <aside class="nav">
+        <div class="brand" data-i18n="gui_app_name">PyGit</div>
+
+        <nav class="nav-list">
+            <button class="nav-item" data-goto="dashboard" data-i18n="gui_nav_dashboard"></button>
+            <button class="nav-item" data-goto="saves"     data-i18n="gui_nav_saves"></button>
+            <button class="nav-item" data-goto="pygnore"   data-i18n="gui_nav_pygnore"></button>
+            <button class="nav-item" data-goto="tools"     data-i18n="gui_nav_tools"></button>
+            <button class="nav-item" data-goto="settings"  data-i18n="gui_nav_settings"></button>
+        </nav>
+
+        <!-- Etat du job, visible depuis n'importe quel ecran : c'est la raison
+             d'etre de la page unique. -->
+        <div class="nav-job" id="job-badge" hidden>
+            <span id="job-badge-label" data-i18n="gui_job_running"></span>
+            <div class="meter"><div class="meter-fill" id="job-badge-meter"></div></div>
+        </div>
+    </aside>
+
+    <main class="main">
+
+    <!-- =====================================================================
+         1. TABLEAU DE BORD
+         ===================================================================== -->
+    <section data-view="dashboard">
+        <h1 data-i18n="gui_dashboard_title"></h1>
+
+        <!-- Signature : l'etat, en un mot, et la fiche d'instruments dessous. -->
+        <div class="card status-card">
+            <div class="status-head">
+                <span class="label" data-i18n="gui_status_label"></span>
+                <button class="btn ghost" data-act="status.refresh" data-i18n="gui_refresh_btn"></button>
+            </div>
+            <!-- Premier rendu TOUJOURS en gui_status_unknown : un status est un job
+                 qui hache la source, ouvrir la fenetre ne doit rien declencher. -->
+            <p class="status-word" id="status-word" data-i18n="gui_status_unknown"></p>
+            <dl class="specs">
+                <div><dt data-i18n="gui_saves_col"></dt><dd id="spec-src" class="mono" data-i18n="gui_value_none"></dd></div>
+                <div><dt data-i18n="gui_dir_label"></dt><dd id="spec-dir" class="mono" data-i18n="gui_value_none"></dd></div>
+            </dl>
+        </div>
+
+        <div class="card">
+            <div class="actions">
+                <button class="btn primary" data-act="job.start:save"    data-i18n="gui_btn_save"></button>
+                <button class="btn"         data-act="job.start:dryrun"  data-i18n="gui_btn_check"></button>
+                <button class="btn"         data-act="goto:saves"        data-i18n="gui_btn_restore"></button>
+            </div>
+        </div>
+
+        <!-- data-lock : gele pendant un job (garde-fou 2 de l'Engine). -->
+        <div class="card" data-lock>
+            <h2 data-i18n="gui_locations_box"></h2>
+            <div class="field">
+                <label data-i18n="gui_wdir_label"></label>
+                <div class="row">
+                    <input type="text" data-field="wdir" id="in-wdir" data-i18n-ph="gui_wdir_placeholder">
+                    <button class="btn" data-act="ui.pick_folder:wdir" data-i18n="gui_browse_btn"></button>
+                </div>
+            </div>
+            <div class="field">
+                <label data-i18n="gui_dir_label"></label>
+                <div class="row">
+                    <input type="text" data-field="dir" id="in-dir" data-i18n-ph="gui_dir_placeholder">
+                    <button class="btn" data-act="ui.pick_folder:dir" data-i18n="gui_browse_btn"></button>
+                </div>
+            </div>
+            <div class="row end">
+                <button class="btn primary" data-act="config.set_locations" data-i18n="gui_save_locations_btn"></button>
+            </div>
+        </div>
+
+        <!-- Le journal : seul endroit ou le markup rich du coeur est rendu. -->
+        <div class="card log-card">
+            <div class="row between">
+                <h2 data-i18n="gui_log_box"></h2>
+                <span class="mono dim" id="job-percent"></span>
+            </div>
+            <div class="meter wide"><div class="meter-fill" id="job-meter"></div></div>
+            <pre class="log" id="log"><span class="dim" data-i18n="gui_no_worker"></span></pre>
+        </div>
+
+        <div class="card">
+            <div class="actions">
+                <button class="btn ghost" data-act="report.readme" data-i18n="gui_view_readme_btn"></button>
+                <button class="btn ghost" data-act="report.dryrun" data-i18n="gui_view_dryrun_btn"></button>
+            </div>
+            <!-- Le resultat d'un dryrun est une liste, pas du texte : il ne va
+                 pas dans le <pre>, qui est reserve aux rapports bruts. -->
+            <ul class="changes" id="dryrun-changes"></ul>
+            <pre class="report" id="report" hidden></pre>
+            <div class="row end" id="report-tools" hidden>
+                <button class="btn ghost" data-act="report.close" data-i18n="gui_close"></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         2. SAUVEGARDES SUIVIES
+         ===================================================================== -->
+    <section data-view="saves">
+        <h1 data-i18n="gui_saves_title"></h1>
+        <p class="intro" data-i18n="gui_saves_intro"></p>
+
+        <div class="card">
+            <div class="row between">
+                <h2 data-i18n="gui_journal_box"></h2>
+                <button class="btn ghost" data-act="manifest.list" data-i18n="gui_refresh_btn"></button>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th data-i18n="gui_saves_col"></th>
+                        <th data-i18n="gui_status_label"></th>
+                    </tr>
+                </thead>
+                <!-- une <tr data-slot> par source, montee par app.js -->
+                <tbody id="saves-rows"></tbody>
+            </table>
+            <p class="empty dim" id="saves-empty" data-i18n="gui_archive_none"></p>
+            <div class="row">
+                <button class="btn danger ghost" data-act="manifest.unlink" data-i18n="gui_untrack_btn"></button>
+            </div>
+        </div>
+
+        <!-- Les deux pre-reponses se fabriquent ici : le job restore part avec
+             {source, dest, from_older, archive} deja resolus et ne pose donc
+             aucune question en vol. Pas de modale sur cet ecran. -->
+        <div class="card">
+            <h2 data-i18n="gui_archive_current"></h2>
+            <div class="archive-list" id="archive-current"></div>
+            <h2 data-i18n="gui_archive_older"></h2>
+            <div class="archive-list" id="archive-older"></div>
+            <p class="empty dim" id="archive-empty" data-i18n="gui_archive_none"></p>
+
+            <div class="field">
+                <label data-i18n="gui_choose_restore_dest"></label>
+                <div class="row">
+                    <input type="text" data-field="restore_dest" id="in-restore-dest">
+                    <button class="btn" data-act="ui.pick_folder:restore_dest" data-i18n="gui_browse_btn"></button>
+                </div>
+            </div>
+            <label class="check">
+                <input type="checkbox" data-field="from_older" id="in-from-older">
+                <span data-i18n="gui_confirm_restore_older"></span>
+            </label>
+            <div class="row end">
+                <button class="btn primary" data-act="job.start:restore" data-i18n="gui_btn_restore"></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         3. FILTRES (.pygnore)
+         ===================================================================== -->
+    <section data-view="pygnore">
+        <h1 data-i18n="gui_pygnore_title"></h1>
+        <p class="intro" data-i18n="gui_pygnore_intro"></p>
+
+        <div class="card" data-lock>
+            <h2 data-i18n="gui_pygnore_path_box"></h2>
+            <div class="row">
+                <input type="text" data-field="pygnore_path" id="in-pygnore-path" data-i18n-ph="gui_pygnore_path_placeholder">
+                <button class="btn" data-act="ui.pick_file:pygnore_path" data-i18n="gui_browse_btn"></button>
+                <button class="btn primary" data-act="pygnore.set_path" data-i18n="gui_pygnore_path_apply_btn"></button>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <h2 data-i18n="gui_pygnore_includes"></h2>
+                <table class="table">
+                    <thead><tr>
+                        <th data-i18n="gui_col_pattern"></th>
+                        <th data-i18n="gui_col_target"></th>
+                    </tr></thead>
+                    <!-- inc[] arrive en [typ, pat] : l'ordre est typ D'ABORD,
+                         et typ s'affiche via gui_rule_target_file/_folder. -->
+                    <tbody id="rules-inc"></tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h2 data-i18n="gui_pygnore_excludes"></h2>
+                <table class="table">
+                    <thead><tr>
+                        <th data-i18n="gui_col_pattern"></th>
+                        <th data-i18n="gui_col_target"></th>
+                    </tr></thead>
+                    <tbody id="rules-exc"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="row">
+            <button class="btn danger ghost" data-act="pygnore.del_rule" data-i18n="gui_delete_rule_btn" data-lock></button>
+        </div>
+
+        <div class="card" data-lock>
+            <h2 data-i18n="gui_add_rule_box"></h2>
+            <div class="field">
+                <label data-i18n="gui_rule_kind"></label>
+                <select data-field="rule_kind" id="in-rule-kind">
+                    <option value="exc" data-i18n="gui_rule_kind_exclude"></option>
+                    <option value="inc" data-i18n="gui_rule_kind_include"></option>
+                </select>
+            </div>
+            <div class="field">
+                <label data-i18n="gui_rule_target"></label>
+                <select data-field="rule_target" id="in-rule-target">
+                    <option value="fi" data-i18n="gui_rule_target_file"></option>
+                    <option value="fo" data-i18n="gui_rule_target_folder"></option>
+                </select>
+            </div>
+            <div class="field">
+                <label data-i18n="gui_rule_pattern"></label>
+                <div class="row">
+                    <input type="text" data-field="rule_pattern" id="in-rule-pattern" data-i18n-ph="gui_rule_pattern_placeholder">
+                    <button class="btn primary" data-act="pygnore.add_rule" data-i18n="gui_add_btn"></button>
+                </div>
+            </div>
+            <p class="msg err" id="rule-error" hidden data-i18n="gui_pattern_required"></p>
+        </div>
+
+        <div class="card">
+            <h2 data-i18n="gui_test_box"></h2>
+            <div class="row">
+                <input type="text" data-field="test_name" id="in-test-name" data-i18n-ph="gui_test_placeholder">
+                <label class="check">
+                    <!-- needtoInclude(name, is_dir) prend deux arguments :
+                         pygnore.test doit recevoir {name, is_dir}. -->
+                    <input type="checkbox" data-field="test_isdir" id="in-test-isdir">
+                    <span data-i18n="gui_test_isdir"></span>
+                </label>
+                <button class="btn" data-act="pygnore.test" data-i18n="gui_test_btn"></button>
+            </div>
+            <p class="msg" id="test-result" hidden></p>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         4. OUTILS
+         ===================================================================== -->
+    <section data-view="tools">
+        <h1 data-i18n="gui_tools_title"></h1>
+
+        <div class="card">
+            <h2 data-i18n="gui_files_box"></h2>
+            <div class="field">
+                <label data-i18n="gui_file1_label"></label>
+                <div class="row">
+                    <input type="text" data-field="f1" id="in-f1" data-i18n-ph="gui_file1_placeholder">
+                    <button class="btn" data-act="ui.pick_file:f1" data-i18n="gui_browse_btn"></button>
+                </div>
+            </div>
+            <div class="field">
+                <label data-i18n="gui_file2_label"></label>
+                <div class="row">
+                    <input type="text" data-field="f2" id="in-f2" data-i18n-ph="gui_file2_placeholder">
+                    <button class="btn" data-act="ui.pick_file:f2" data-i18n="gui_browse_btn"></button>
+                </div>
+            </div>
+            <div class="row end">
+                <button class="btn primary" data-act="job.start:checkfiles" data-i18n="gui_compare_btn"></button>
+            </div>
+            <p class="msg" id="files-result" hidden>
+                <span class="label" data-i18n="gui_result_label"></span>
+                <span id="files-verdict"></span>
+            </p>
+        </div>
+
+        <div class="card">
+            <h2 data-i18n="gui_folders_box"></h2>
+            <div class="field">
+                <label data-i18n="gui_folder1_label"></label>
+                <div class="row">
+                    <input type="text" data-field="d1" id="in-d1" data-i18n-ph="gui_folder1_placeholder">
+                    <button class="btn" data-act="ui.pick_folder:d1" data-i18n="gui_browse_btn"></button>
+                </div>
+            </div>
+            <div class="field">
+                <label data-i18n="gui_folder2_label"></label>
+                <div class="row">
+                    <input type="text" data-field="d2" id="in-d2" data-i18n-ph="gui_folder2_placeholder">
+                    <button class="btn" data-act="ui.pick_folder:d2" data-i18n="gui_browse_btn"></button>
+                </div>
+            </div>
+            <div class="row end">
+                <button class="btn primary" data-act="job.start:checkfolder" data-i18n="gui_compare_btn"></button>
+            </div>
+            <!-- une ligne par changement, deja mise a plat par le moteur en
+                 {kind, path} : le front ne lit jamais un tuple a None. -->
+            <ul class="changes" id="folders-changes"></ul>
+            <p class="empty dim" id="folders-nodiff" hidden data-i18n="gui_no_diff"></p>
+        </div>
+
+        <div class="card">
+            <h2 data-i18n="gui_tree_box"></h2>
+            <div class="row">
+                <input type="text" data-field="tree_path" id="in-tree-path" data-i18n-ph="gui_tree_placeholder">
+                <button class="btn" data-act="ui.pick_folder:tree_path" data-i18n="gui_browse_btn"></button>
+                <button class="btn primary" data-act="tree.children" data-i18n="gui_show_btn"></button>
+            </div>
+            <!-- Un niveau a la fois : get_child_list ne hache pas, donc ceci
+                 est une lecture et reste utilisable pendant un job. -->
+            <ul class="tree" id="tree-root"></ul>
+            <p class="empty dim" id="tree-msg" hidden></p>
+        </div>
+    </section>
+
+    <!-- =====================================================================
+         5. PARAMETRES
+         ===================================================================== -->
+    <section data-view="settings">
+        <h1 data-i18n="gui_settings_title"></h1>
+
+        <div class="card" data-lock>
+            <h2 data-i18n="gui_lang_box"></h2>
+            <!-- supported[] filtre deja les langues easter egg cote moteur. -->
+            <select data-field="lang" id="in-lang"></select>
+            <p class="msg ok" id="lang-msg" hidden data-i18n="gui_lang_updated"></p>
+        </div>
+
+        <div class="card" data-lock>
+            <h2 data-i18n="gui_theme_box"></h2>
+            <select data-field="theme" id="in-theme">
+                <option value="minimal" data-i18n="gui_theme_minimal"></option>
+                <option value="retroma" data-i18n="gui_theme_retroma"></option>
+                <option value="apex"    data-i18n="gui_theme_apex"></option>
+                <option value="basic"   data-i18n="gui_theme_basic"></option>
+            </select>
+            <div class="field">
+                <label data-i18n="gui_accent_label"></label>
+                <div class="row">
+                    <input type="color" data-field="accent" id="in-accent">
+                    <button class="btn ghost" data-act="theme.accent_reset" data-i18n="gui_accent_reset"></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" data-lock>
+            <h2 data-i18n="gui_threshold_box"></h2>
+            <p class="hint" data-i18n="gui_threshold_hint"></p>
+            <div class="row">
+                <input type="range" min="0" max="100" step="1" data-field="threshold" id="in-threshold">
+                <!-- gui_threshold_label porte {value} : rendu par t(key, params). -->
+                <span class="mono" id="threshold-label" data-i18n="gui_threshold_label"></span>
+                <button class="btn primary" data-act="config.set_threshold" data-i18n="gui_apply_btn"></button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 data-i18n="gui_about_box"></h2>
+            <p class="mono dim" id="about-version"></p>
+            <div class="about" id="about-text"></div>
+        </div>
+    </section>
+
+    </main>
+</div>
+
+<!-- =========================================================================
+     MODALE DE QUESTION
+     Un seul aller-retour possible, et uniquement pendant un save.
+     Le titre du corps est "gui_ask_" + la cle de la question du coeur :
+     mapping mecanique, aucune table a maintenir.
+     ========================================================================= -->
+<div class="scrim" id="ask" hidden>
+    <div class="modal" role="dialog" aria-modal="true">
+        <h2 data-i18n="gui_ask_title"></h2>
+        <p id="ask-body"></p>
+        <div class="row end">
+            <button class="btn"         data-act="job.answer:no"  data-i18n="gui_no"></button>
+            <button class="btn primary" data-act="job.answer:yes" data-i18n="gui_yes"></button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmations (gui_confirm_save, gui_untrack_confirm, ...) -->
+<div class="scrim" id="confirm" hidden>
+    <div class="modal" role="dialog" aria-modal="true">
+        <p id="confirm-body"></p>
+        <div class="row end">
+            <button class="btn"         data-act="confirm:no"  data-i18n="gui_cancel"></button>
+            <button class="btn primary" data-act="confirm:yes" data-i18n="gui_yes"></button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<!-- bridge.js d'abord : app.js suppose que window.Bridge existe.
+     Pas de type="module" — les modules ES sont bloqués par CORS en file://
+     selon les moteurs WebKit, et la page est chargée en file://. -->
+<script src="bridge.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
