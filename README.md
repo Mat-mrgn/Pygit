@@ -120,9 +120,13 @@ Some langages were reviewed by native speaker (French, English, Deutsch) but sti
 
 Version  Date          Notes  
 A      13/04/2026    Initial release
+
 B      27/04/2026    .pygnore management, basic CLI commands
+
 C      06/05/2026    Persistent config file, pygnore and save commands
+
 D      13/05/2026    Multilingual support, pathtree, checksum, readme commands and other commands. Multilingual support extended to all PyGit commands and even inside the program internals
+
 E      25/08/2026    CLI fully functionable, more langages and the start of the GUI interface. There is no a manifest and the save is done differently to provide more saves capability management.
 
 
