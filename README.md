@@ -18,7 +18,7 @@ A personal, Python-based local file backup manager inspired by Git. Pygit lets y
 - **Save** Create a timestamped `.zip` snapshot of any working directory
 - **Dry-run** preview what has changed (created, modified, moved, deleted) before committing a save
 - **Restore** unzip any snapshot (current or older) back to a target folder
-- **Integrity check1** SHA-based checksum comparison between saves and source to detect corruption
+- **Integrity check** Xhash-based checksum comparison between saves and source to detect corruption (Xhash is used for fast data comparison but SHOULD NOT be used for security check, it isn't suitable for security integrity     check but is still good for general-purpose file integrity, it's because I personally choose that speed was more important.
 - **Pygnore** a .pygnore file (analogous to .gitignore) to include/exclude files and folders by pattern
 - **Tree inspection** explore the file tree of any folder or .zip archive
 - **Multilingual interface** supports 15+ languages (English, French, Spanish, German, Italian, Portuguese, Dutch, Polish, Japanese, Chinese, Latin, and more)
