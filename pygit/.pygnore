@@ -1,7 +1,0 @@
-# default exclude
-> fo __pycache__
-> fo .git
-> fi *.DS_Store
-> fi desktop.ini
-> fo .venv
-> fo env
